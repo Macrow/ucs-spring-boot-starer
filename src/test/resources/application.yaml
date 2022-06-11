@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+ucs:
+  enable: true
+  app-service-name: test
+  service-base-url: http://localhost:8019
+  access-code: 1A2B3C4D
+  client-id: wsTDJzgAKg
+  client-secret: 123456
