@@ -139,6 +139,7 @@ public class UcsHttpClient implements Client {
         String errMessage;
         HttpResponse<JsonNode> res;
         Unirest.config()
+                .reset()
                 // 默认关闭SSL安全校验
                 .verifySsl(false)
                 .connectTimeout(timeout * 1000);
