@@ -16,4 +16,6 @@ public @interface UcsPermByCode {
 
     String code();
 
+    boolean fulfillJwt() default true;
+
 }

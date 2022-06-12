@@ -62,7 +62,7 @@ public class TestController {
     @UcsPermByCode(code = "UCS_USER_LIST")
     @GetMapping("/perm-by-code")
     public void permByCode() {
-
+        log.info(UcsUtil.getJwtUser().getName());
     }
 
     /**

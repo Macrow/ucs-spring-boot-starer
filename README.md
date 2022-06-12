@@ -1,5 +1,5 @@
-# ucs-spring-boot-starer
-[![](https://jitpack.io/v/Macrow/ucs-spring-boot-starer.svg)](https://jitpack.io/#Macrow/ucs-spring-boot-starer)
+# ucs-spring-boot-starter
+[![](https://jitpack.io/v/Macrow/ucs-spring-boot-starter.svg)](https://jitpack.io/#Macrow/ucs-spring-boot-starter)
 
 用于将```ucs```集成到```SpringBoot```的开发包
 
@@ -19,8 +19,8 @@
 ```
 dependency>
     <groupId>com.github.Macrow</groupId>
-    <artifactId>ucs-spring-boot-starer</artifactId>
-    <version>${ucs-spring-boot-starer.version}</version>
+    <artifactId>ucs-spring-boot-starter</artifactId>
+    <version>${ucs-spring-boot-starter.version}</version>
 </dependency>
 <dependency>
     <groupId>org.springframework.boot</groupId>

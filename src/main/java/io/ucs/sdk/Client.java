@@ -19,8 +19,8 @@ public interface Client {
     Client setHttpHeaderNames(String accessCodeHeader, String randomKeyHeader, String userTokenHeader, String clientTokenHeader);
 
     UcsResult<JwtUser> userValidateJwt();
-    UcsResult<PermitResult> userValidatePermByOperation(String code);
-    UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path);
+    UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt);
+    UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt);
 
     <T> UcsResult<T> userRequest(Class<T> klass, String method, String url, Map<String, Object> data);
     <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data);

@@ -15,4 +15,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PermitResult {
     private Boolean permit;
+    private JwtUser user;
 }

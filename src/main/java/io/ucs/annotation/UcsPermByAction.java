@@ -18,4 +18,6 @@ public @interface UcsPermByAction {
 
     String path() default "";
 
+    boolean fulfillJwt() default true;
+
 }
