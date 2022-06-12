@@ -4,7 +4,7 @@ package io.ucs.sdk;
  * @author Macrow
  * @date 2022-03-16
  */
-interface Constant {
+public interface Constant {
     String TIMEOUT_MSG = "timeout";
     String MSG_UNKNOWN = "未知错误";
     String MSG_HTTP_FAILED = "网络请求失败";
@@ -21,4 +21,5 @@ interface Constant {
     String BEARER_NAME = "Authorization";
     String CLIENT_HEADER_NAME = "Client-Authorization";
     String BEARER_TYPE = "Bearer";
+    String REQUEST_JWT_USER_KEY = "__UCS_JWT_USER__";
 }

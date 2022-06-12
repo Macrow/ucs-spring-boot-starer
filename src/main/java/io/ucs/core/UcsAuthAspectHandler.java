@@ -3,10 +3,10 @@ package io.ucs.core;
 import io.ucs.annotation.UcsAuth;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsAuthException;
+import io.ucs.sdk.Constant;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.JwtUser;
 import io.ucs.sdk.entity.UcsResult;
-import io.ucs.util.UcsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -44,7 +44,7 @@ public class UcsAuthAspectHandler {
             if (res.getSuccess()) {
                 JwtUser jwtUser = res.getResult();
                 jwtUser.setToken(token);
-                UcsUtil.setJwtUser(jwtUser);
+                request.setAttribute(Constant.REQUEST_JWT_USER_KEY, jwtUser);
             } else {
                 throw new UcsAuthException(res.getMessage());
             }

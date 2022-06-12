@@ -20,7 +20,7 @@
         <lombok.version>1.18.24</lombok.version>
         <hutool.version>5.8.1</hutool.version>
         <sl4j.version>1.7.36</sl4j.version>
-        <unirest-java.version>3.13.8</unirest-java.version>
+        <unirest-java.version>3.13.10</unirest-java.version>
     </properties>
 
     <dependencies>

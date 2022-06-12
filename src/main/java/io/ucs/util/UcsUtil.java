@@ -1,19 +1,21 @@
 package io.ucs.util;
 
+import io.ucs.sdk.Constant;
 import io.ucs.sdk.entity.JwtUser;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 /**
  * @author Macrow
  * @date 2022/06/11
  */
 public class UcsUtil {
-    private static JwtUser jwtUser;
-
     public static JwtUser getJwtUser() {
-        return jwtUser;
-    }
-
-    public static void setJwtUser(JwtUser jwtUser) {
-        UcsUtil.jwtUser = jwtUser;
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
+        return (JwtUser) request.getAttribute(Constant.REQUEST_JWT_USER_KEY);
     }
 }

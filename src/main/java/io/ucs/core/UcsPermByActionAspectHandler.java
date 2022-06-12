@@ -3,10 +3,10 @@ package io.ucs.core;
 import io.ucs.annotation.UcsPermByAction;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsPermException;
+import io.ucs.sdk.Constant;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.PermitResult;
 import io.ucs.sdk.entity.UcsResult;
-import io.ucs.util.UcsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -52,7 +52,7 @@ public class UcsPermByActionAspectHandler {
             UcsResult<PermitResult> res = ucsHttpClient.setUserToken(token).userValidatePermByAction(ucsConfig.getAppServiceName(), method, path, ucsPermByAction.fulfillJwt());
             if (res.getSuccess()) {
                 if (ucsPermByAction.fulfillJwt()) {
-                    UcsUtil.setJwtUser(res.getResult().getUser());
+                    request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());
                 }
                 if (!res.getResult().getPermit()) {
                     throw new UcsPermException("UCS权限验证失败");
