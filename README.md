@@ -17,14 +17,10 @@
 
 ### 安装，请指定版本
 ```
-dependency>
+<dependency>
     <groupId>com.github.Macrow</groupId>
     <artifactId>ucs-spring-boot-starter</artifactId>
     <version>${ucs-spring-boot-starter.version}</version>
-</dependency>
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-aop</artifactId>
 </dependency>
 ```
 

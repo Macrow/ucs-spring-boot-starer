@@ -18,7 +18,7 @@
         <java.version>11</java.version>
         <spring-boot.version>2.7.0</spring-boot.version>
         <lombok.version>1.18.24</lombok.version>
-        <hutool.version>5.8.1</hutool.version>
+        <hutool.version>5.8.2</hutool.version>
         <sl4j.version>1.7.36</sl4j.version>
         <unirest-java.version>3.13.10</unirest-java.version>
     </properties>
@@ -88,6 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <source>${java.version}</source>
