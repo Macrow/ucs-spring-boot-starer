@@ -138,9 +138,12 @@ public class UcsHttpClient implements Client {
         }
         String errMessage;
         HttpResponse<JsonNode> res;
+        Unirest.config()
+                // 默认关闭SSL安全校验
+                .verifySsl(false)
+                .connectTimeout(timeout * 1000);
         HttpRequestWithBody req = Unirest
                 .request(method, baseUrl + url)
-                .connectTimeout(this.timeout * 1000)
                 .contentType(ContentType.APPLICATION_JSON.toString())
                 .headers(headers);
         if (formData != null && !formData.isEmpty()) {

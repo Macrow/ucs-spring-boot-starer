@@ -26,6 +26,11 @@ public class UcsAutoConfiguration {
 
     @Bean
     public UcsHttpClient httpUcsClient() {
-        return new UcsHttpClient(ucsConfig.getServiceBaseUrl(), ucsConfig.getAccessCode(), ucsConfig.getClientId(), ucsConfig.getClientSecret());
+        return new UcsHttpClient(
+                ucsConfig.getServiceBaseUrl(),
+                ucsConfig.getAccessCode(),
+                ucsConfig.getClientId(),
+                ucsConfig.getClientSecret()
+        );
     }
 }
