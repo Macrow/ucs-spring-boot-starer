@@ -24,6 +24,24 @@
 </dependency>
 ```
 
+### 配置文件
+```yaml
+# application.yaml
+server:
+  port: 8080
+
+ucs:
+  enable: true
+  # your app service name
+  app-service-name: test
+  # ucs service base url
+  service-base-url: http://localhost:8019
+  access-code: 1A2B3C4D
+  # 应用级别调用使用的clientId和clientSecret
+  client-id: wsTDJzgAKg
+  client-secret: 123456
+```
+
 ### 权限校验
 
 ```java
