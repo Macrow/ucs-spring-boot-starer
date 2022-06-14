@@ -7,11 +7,15 @@ import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.JwtUser;
 import io.ucs.sdk.entity.UcsResult;
 import io.ucs.util.UcsUtil;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author Macrow
@@ -83,7 +87,15 @@ public class TestController {
     public void client() {
         UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "POST", "/api/v1/ucs/client/validate", null);
         log.info(clientRes.getSuccess().toString());
-        UcsResult<Object> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(Object.class, "GET", "/api/v1/ucs/users", null);
-        log.info(userRes.getSuccess().toString());
+        ParameterizedTypeReference<Ids> type = new ParameterizedTypeReference<>() {};
+        UcsResult<Ids> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(type.getType(), "GET", "/api/v1/ucs/current/org-ids", null);
+        userRes.getResult().getIds().forEach(log::info);
+        userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(Ids.class, "GET", "/api/v1/ucs/current/org-ids", null);
+        userRes.getResult().getIds().forEach(log::info);
+    }
+
+    @Data
+    private static class Ids {
+        private List<String> ids;
     }
 }

@@ -4,6 +4,7 @@ import io.ucs.sdk.entity.JwtUser;
 import io.ucs.sdk.entity.PermitResult;
 import io.ucs.sdk.entity.UcsResult;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -23,5 +24,7 @@ public interface Client {
     UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt);
 
     <T> UcsResult<T> userRequest(Class<T> klass, String method, String url, Map<String, Object> data);
+    <T> UcsResult<T> userRequest(Type targetType, String method, String url, Map<String, Object> data);
     <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data);
+    <T> UcsResult<T> clientRequest(Type targetType, String method, String url, Map<String, Object> data);
 }

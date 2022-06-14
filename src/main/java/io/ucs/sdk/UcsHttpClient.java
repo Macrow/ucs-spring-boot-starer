@@ -7,6 +7,7 @@ import io.ucs.sdk.entity.UcsResult;
 import kong.unirest.*;
 import kong.unirest.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class UcsHttpClient implements Client {
 
     @Override
     public UcsResult<JwtUser> userValidateJwt() {
-        return request(JwtUser.class, Constant.ValidateJwtURL, "GET", null, RequestType.USER);
+        return request(JwtUser.class, null, "GET", Constant.ValidateJwtURL, null, RequestType.USER);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class UcsHttpClient implements Client {
         Map<String, Object> formData = new HashMap<>();
         formData.put("code", code);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
-        return request(PermitResult.class, Constant.ValidatePermOperationByCodeURL, "POST", formData, RequestType.USER);
+        return request(PermitResult.class, null, "POST", Constant.ValidatePermOperationByCodeURL, formData, RequestType.USER);
     }
 
     @Override
@@ -107,20 +108,30 @@ public class UcsHttpClient implements Client {
         formData.put("method", method);
         formData.put("path", path);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
-        return request(PermitResult.class, Constant.ValidatePermActionURL, "POST", formData, RequestType.USER);
+        return request(PermitResult.class, null, "POST", Constant.ValidatePermActionURL, formData, RequestType.USER);
     }
 
     @Override
     public <T> UcsResult<T> userRequest(Class<T> klass, String method, String url, Map<String, Object> data) {
-        return request(klass, url, method, data, RequestType.USER);
+        return request(klass, null, method, url, data, RequestType.USER);
+    }
+
+    @Override
+    public <T> UcsResult<T> userRequest(Type targetType, String method, String url, Map<String, Object> data) {
+        return request(null, targetType, method, url, data, RequestType.USER);
     }
 
     @Override
     public <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data) {
-        return request(klass, url, method, data, RequestType.CLIENT);
+        return request(klass, null, method, url, data, RequestType.CLIENT);
     }
 
-    private <T> UcsResult<T> request(Class<T> klass, String url, String method, Map<String, Object> formData, RequestType requestType) {
+    @Override
+    public <T> UcsResult<T> clientRequest(Type targetType, String method, String url, Map<String, Object> data) {
+        return request(null, targetType, method, url, data, RequestType.CLIENT);
+    }
+
+    private <T> UcsResult<T> request(Class<T> klass, Type targetType, String method, String url, Map<String, Object> formData, RequestType requestType) {
         Map<String, String> headers = new HashMap<>();
         headers.put(this.accessCodeHeader, this.accessCode);
         headers.put(this.randomKeyHeader, getRandomKey(6));
@@ -158,8 +169,12 @@ public class UcsHttpClient implements Client {
                 errMessage = body.get("message").toString();
             } else {
                 Object result = body.get("result");
-
-                T t = JSONUtil.toBean(result.toString(), klass);
+                T t;
+                if (klass != null) {
+                    t = JSONUtil.toBean(result.toString(), klass);
+                } else {
+                    t = JSONUtil.toBean(result.toString(), targetType, false);
+                }
                 return UcsResult.<T>builder()
                         .success(true)
                         .message("")
@@ -178,19 +193,19 @@ public class UcsHttpClient implements Client {
 
     private void prepareForUserRequest() {
         if (this.baseUrl == null || this.baseUrl.isEmpty()) {
-            throw new IllegalArgumentException("please provide baseUrl first");
+            throw new IllegalArgumentException("请指定ucs服务的base url");
         }
         if (this.userToken == null || this.userToken.isEmpty()) {
-            throw new IllegalArgumentException("please provide token first");
+            throw new IllegalArgumentException("请为ucs提供令牌");
         }
     }
 
     private void prepareForClientRequest() {
         if (this.baseUrl == null || this.baseUrl.isEmpty()) {
-            throw new IllegalArgumentException("please provide baseUrl first");
+            throw new IllegalArgumentException("请指定ucs服务的base url");
         }
         if (this.clientId == null || this.clientId.isEmpty() || this.clientSecret == null || this.clientSecret.isEmpty()) {
-            throw new IllegalArgumentException("please provide client id/secret");
+            throw new IllegalArgumentException("请为ucs提供客户端id和秘钥");
         }
     }
 
