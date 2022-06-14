@@ -1,6 +1,8 @@
 package io.ucs.core;
 
+import cn.hutool.extra.spring.SpringUtil;
 import io.ucs.annotation.UcsAuth;
+import io.ucs.handler.Handler;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsAuthException;
 import io.ucs.sdk.Constant;
@@ -45,6 +47,20 @@ public class UcsAuthAspectHandler {
                 JwtUser jwtUser = res.getResult();
                 jwtUser.setToken(token);
                 request.setAttribute(Constant.REQUEST_JWT_USER_KEY, jwtUser);
+                if (ucsAuth.afterHandler() != Handler.class) {
+                    Object handler = null;
+                    try {
+                        handler = SpringUtil.getBean(ucsAuth.afterHandler());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.error("afterHandler参数错误:" + e.getMessage());
+                    }
+                    if (handler instanceof Handler) {
+                        ((Handler) handler).handle(jwtUser);
+                    } else {
+                        throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
+                    }
+                }
             } else {
                 throw new UcsAuthException(res.getMessage());
             }

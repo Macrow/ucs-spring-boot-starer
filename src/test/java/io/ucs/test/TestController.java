@@ -36,6 +36,16 @@ public class TestController {
     }
 
     /**
+     * 校验用户登录是否合法，并返回JwtUser对象
+     * 如果验证失败，会抛出UcsAuthException异常
+     */
+    @UcsAuth(afterHandler = CustomAfterHandler.class)
+    @GetMapping("/auth-with-custom-handler")
+    public void authWithCustomHandler() {
+
+    }
+
+    /**
      * 校验用户是否拥有Action权限，如果不指定method和path，会自动识别
      * 如果验证失败，会抛出UcsPermException
      */
@@ -59,7 +69,7 @@ public class TestController {
      * 校验用户是否拥有Operations权限，通过指定code进行验证
      * 如果验证失败，会抛出UcsPermException
      */
-    @UcsPermByCode(code = "UCS_USER_LIST")
+    @UcsPermByCode(code = "UCS_USER_LIST", afterHandler = CustomAfterHandler.class)
     @GetMapping("/perm-by-code")
     public void permByCode() {
         log.info(UcsUtil.getJwtUser().getName());

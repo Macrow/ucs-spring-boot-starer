@@ -1,8 +1,11 @@
 package io.ucs.core;
 
+import cn.hutool.extra.spring.SpringUtil;
 import io.ucs.annotation.UcsPermByCode;
 import io.ucs.config.UcsConfig;
+import io.ucs.exception.UcsAuthException;
 import io.ucs.exception.UcsPermException;
+import io.ucs.handler.Handler;
 import io.ucs.sdk.Constant;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.PermitResult;
@@ -21,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 /**
- *
  * @author Macrow
  * @date 2022/06/11
  */
@@ -45,6 +47,20 @@ public class UcsPermByCodeAspectHandler {
             if (res.getSuccess()) {
                 if (ucsPermByCode.fulfillJwt()) {
                     request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());
+                    if (ucsPermByCode.afterHandler() != Handler.class) {
+                        Object handler = null;
+                        try {
+                            handler = SpringUtil.getBean(ucsPermByCode.afterHandler());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error("afterHandler参数错误:" + e.getMessage());
+                        }
+                        if (handler instanceof Handler) {
+                            ((Handler) handler).handle(res.getResult().getUser());
+                        } else {
+                            throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
+                        }
+                    }
                 }
                 if (!res.getResult().getPermit()) {
                     throw new UcsPermException("UCS权限验证失败");

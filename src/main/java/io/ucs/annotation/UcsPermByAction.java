@@ -1,5 +1,7 @@
 package io.ucs.annotation;
 
+import io.ucs.handler.Handler;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,5 +21,7 @@ public @interface UcsPermByAction {
     String path() default "";
 
     boolean fulfillJwt() default true;
+
+    Class<?> afterHandler() default Handler.class;
 
 }
