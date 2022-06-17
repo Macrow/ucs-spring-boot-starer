@@ -14,6 +14,7 @@ public interface Constant {
     String DefaultHeaderAccessCode = "Access-Code";
 
     String ValidateJwtURL = "/api/v1/ucs/current/jwt";
+    String ValidateClientURL = "/api/v1/ucs/client/validate";
     String ValidatePermOperationByCodeURL = "/api/v1/ucs/current/check-operation";
     String ValidatePermActionURL = "/api/v1/ucs/current/check-action";
 

@@ -2,6 +2,7 @@ package io.ucs;
 
 import io.ucs.config.UcsConfig;
 import io.ucs.core.UcsAuthAspectHandler;
+import io.ucs.core.UcsClientAuthAspectHandler;
 import io.ucs.core.UcsPermByActionAspectHandler;
 import io.ucs.core.UcsPermByCodeAspectHandler;
 import io.ucs.sdk.UcsHttpClient;
@@ -19,7 +20,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnProperty(prefix = UcsConfig.PREFIX, name = "enable", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(UcsConfig.class)
-@Import({UcsAuthAspectHandler.class, UcsPermByActionAspectHandler.class, UcsPermByCodeAspectHandler.class})
+@Import({UcsAuthAspectHandler.class, UcsClientAuthAspectHandler.class, UcsPermByActionAspectHandler.class, UcsPermByCodeAspectHandler.class})
 @RequiredArgsConstructor
 public class UcsAutoConfiguration {
     final UcsConfig ucsConfig;

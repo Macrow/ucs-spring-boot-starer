@@ -1,6 +1,7 @@
 package io.ucs.test;
 
 import io.ucs.annotation.UcsAuth;
+import io.ucs.annotation.UcsClientAuth;
 import io.ucs.annotation.UcsPermByAction;
 import io.ucs.annotation.UcsPermByCode;
 import io.ucs.sdk.UcsHttpClient;
@@ -37,6 +38,16 @@ public class TestController {
     public void auth() {
         JwtUser jwtUser = UcsUtil.getJwtUser();
         log.info(jwtUser.getName());
+    }
+
+    /**
+     * 校验应用级调用是否合法
+     * 如果验证失败，会抛出UcsAuthException异常
+     */
+    @UcsClientAuth
+    @GetMapping("/client-auth")
+    public void clientAuth() {
+        log.info("client OK");
     }
 
     /**

@@ -64,6 +64,8 @@ public class UcsAuthAspectHandler {
             } else {
                 throw new UcsAuthException(res.getMessage());
             }
+        } else {
+            throw new UcsAuthException("权限验证失败：请求令牌格式错误");
         }
 
         return joinPoint.proceed();

@@ -27,6 +27,7 @@ public class UcsHttpClient implements Client {
     private String userTokenHeader;
     private String clientTokenHeader;
     private String userToken = null;
+    private String clientToken = null;
     private String clientId = null;
     private String clientSecret = null;
     private int timeout = Constant.DEFAULT_TIMEOUT_IN_SECONDS;
@@ -73,6 +74,12 @@ public class UcsHttpClient implements Client {
     }
 
     @Override
+    public Client setClientToken(String token) {
+        this.clientToken = token;
+        return this;
+    }
+
+    @Override
     public Client setClientIdAndSecret(String clientId, String clientSecret) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -91,6 +98,11 @@ public class UcsHttpClient implements Client {
     @Override
     public UcsResult<JwtUser> userValidateJwt() {
         return request(JwtUser.class, null, "GET", Constant.ValidateJwtURL, null, RequestType.USER);
+    }
+
+    @Override
+    public UcsResult<Void> clientValidate() {
+        return request(Void.class, null, "GET", Constant.ValidateClientURL, null, RequestType.CLIENT);
     }
 
     @Override
@@ -142,7 +154,9 @@ public class UcsHttpClient implements Client {
                 break;
             case CLIENT:
                 prepareForClientRequest();
-                headers.put(this.clientTokenHeader, Base64.getEncoder().encodeToString((this.clientId + "@" + this.clientSecret).getBytes(StandardCharsets.UTF_8)));
+                final String finalClientToken = this.clientToken;
+                this.clientToken = null;
+                headers.put(this.clientTokenHeader, finalClientToken);
                 break;
             default:
                 throw new IllegalArgumentException("不支持的请求类型");
@@ -170,10 +184,14 @@ public class UcsHttpClient implements Client {
             } else {
                 Object result = body.get("result");
                 T t;
-                if (klass != null) {
-                    t = JSONUtil.toBean(result.toString(), klass);
+                if (klass == Void.class || targetType == Void.TYPE) {
+                    t = null;
                 } else {
-                    t = JSONUtil.toBean(result.toString(), targetType, false);
+                    if (klass != null) {
+                        t = JSONUtil.toBean(result.toString(), klass);
+                    } else {
+                        t = JSONUtil.toBean(result.toString(), targetType, false);
+                    }
                 }
                 return UcsResult.<T>builder()
                         .success(true)
@@ -204,8 +222,11 @@ public class UcsHttpClient implements Client {
         if (this.baseUrl == null || this.baseUrl.isEmpty()) {
             throw new IllegalArgumentException("请指定ucs服务的base url");
         }
-        if (this.clientId == null || this.clientId.isEmpty() || this.clientSecret == null || this.clientSecret.isEmpty()) {
-            throw new IllegalArgumentException("请为ucs提供客户端id和秘钥");
+        if (this.clientToken == null || this.clientToken.isEmpty()) {
+            if (this.clientId == null || this.clientId.isEmpty() || this.clientSecret == null || this.clientSecret.isEmpty()) {
+                throw new IllegalArgumentException("请为ucs提供客户端id和秘钥，或者提供token");
+            }
+            this.clientToken = Base64.getEncoder().encodeToString((this.clientId + "@" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
         }
     }
 

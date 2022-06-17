@@ -69,7 +69,7 @@ public class UcsPermByCodeAspectHandler {
                 throw new RuntimeException(res.getMessage());
             }
         } else {
-            throw new UcsPermException("令牌错误");
+            throw new UcsPermException("权限验证失败：请求令牌格式错误");
         }
         return joinPoint.proceed();
     }

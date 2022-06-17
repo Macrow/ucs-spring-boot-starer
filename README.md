@@ -76,6 +76,16 @@ public class TestController {
     }
 
     /**
+     * 校验应用级调用是否合法
+     * 如果验证失败，会抛出UcsAuthException异常
+     */
+    @UcsClientAuth
+    @GetMapping("/client-auth")
+    public void clientAuth() {
+        log.info("client OK");
+    }
+
+    /**
      * 校验用户登录是否合法，并返回JwtUser对象
      * 如果验证失败，会抛出UcsAuthException异常
      */

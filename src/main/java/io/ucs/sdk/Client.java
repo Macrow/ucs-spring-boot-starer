@@ -16,10 +16,12 @@ public interface Client {
     Client setBaseUrl(String baseUrl);
     Client setAccessCode(String accessCode);
     Client setUserToken(String token);
+    Client setClientToken(String token);
     Client setClientIdAndSecret(String clientId, String clientSecret);
     Client setHttpHeaderNames(String accessCodeHeader, String randomKeyHeader, String userTokenHeader, String clientTokenHeader);
 
     UcsResult<JwtUser> userValidateJwt();
+    UcsResult<Void> clientValidate();
     UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt);
     UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt);
 
