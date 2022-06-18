@@ -36,7 +36,7 @@ public class UcsClientAuthAspectHandler {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
         String token = request.getHeader(ucsConfig.getClientTokenHeader());
-        if (token != null) {
+        if (token != null && token.toLowerCase().startsWith("bearer ")) {
             UcsResult<Void> res = ucsHttpClient.setClientToken(token).clientValidate();
             if (!res.getSuccess()) {
                 throw new UcsAuthException(res.getMessage());
