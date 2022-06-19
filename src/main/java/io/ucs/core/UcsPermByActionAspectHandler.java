@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 /**
- *
  * @author Macrow
  * @date 2022/06/11
  */
@@ -52,7 +51,12 @@ public class UcsPermByActionAspectHandler {
             if (path.isEmpty()) {
                 path = request.getRequestURI();
             }
-            UcsResult<PermitResult> res = ucsHttpClient.setUserToken(token).userValidatePermByAction(ucsConfig.getAppServiceName(), method, path, ucsPermByAction.fulfillJwt());
+            UcsResult<PermitResult> res;
+            try {
+                res = ucsHttpClient.setUserToken(token).userValidatePermByAction(ucsConfig.getAppServiceName(), method, path, ucsPermByAction.fulfillJwt());
+            } catch (Exception e) {
+                throw new UcsAuthException(e.getMessage());
+            }
             if (res.getSuccess()) {
                 if (ucsPermByAction.fulfillJwt()) {
                     request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());

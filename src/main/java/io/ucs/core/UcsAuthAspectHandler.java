@@ -42,7 +42,12 @@ public class UcsAuthAspectHandler {
         String token = request.getHeader(ucsConfig.getUserTokenHeader());
         if (token != null && token.toLowerCase().startsWith("bearer ")) {
             token = token.substring("bearer ".length());
-            UcsResult<JwtUser> res = ucsHttpClient.setUserToken(token).userValidateJwt();
+            UcsResult<JwtUser> res;
+            try {
+                res = ucsHttpClient.setUserToken(token).userValidateJwt();
+            } catch (Exception e) {
+                throw new UcsAuthException(e.getMessage());
+            }
             if (res.getSuccess()) {
                 JwtUser jwtUser = res.getResult();
                 jwtUser.setToken(token);

@@ -43,7 +43,12 @@ public class UcsPermByCodeAspectHandler {
         String token = request.getHeader(ucsConfig.getUserTokenHeader());
         if (token != null && token.toLowerCase().startsWith("bearer ")) {
             token = token.substring("bearer ".length());
-            UcsResult<PermitResult> res = ucsHttpClient.setUserToken(token).userValidatePermByOperation(ucsPermByCode.code(), ucsPermByCode.fulfillJwt());
+            UcsResult<PermitResult> res;
+            try {
+                res = ucsHttpClient.setUserToken(token).userValidatePermByOperation(ucsPermByCode.code(), ucsPermByCode.fulfillJwt());
+            } catch (Exception e) {
+                throw new UcsAuthException(e.getMessage());
+            }
             if (res.getSuccess()) {
                 if (ucsPermByCode.fulfillJwt()) {
                     request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());

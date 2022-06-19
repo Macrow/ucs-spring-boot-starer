@@ -39,7 +39,12 @@ public class UcsClientAuthAspectHandler {
         String token = request.getHeader(ucsConfig.getClientTokenHeader());
         if (token != null && token.toLowerCase().startsWith("bearer ")) {
             token = token.substring("bearer ".length());
-            UcsResult<Void> res = ucsHttpClient.setClientToken(token).clientValidate(ClientAuthType.TOKEN);
+            UcsResult<Void> res;
+            try {
+                res = ucsHttpClient.setClientToken(token).clientValidate(ClientAuthType.TOKEN);
+            } catch (Exception e) {
+                throw new UcsAuthException(e.getMessage());
+            }
             if (!res.getSuccess()) {
                 throw new UcsAuthException(res.getMessage());
             }
