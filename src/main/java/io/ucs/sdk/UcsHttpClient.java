@@ -97,12 +97,12 @@ public class UcsHttpClient implements Client {
 
     @Override
     public UcsResult<JwtUser> userValidateJwt() {
-        return request(JwtUser.class, null, "GET", Constant.ValidateJwtURL, null, RequestType.USER);
+        return request(JwtUser.class, null, "GET", Constant.ValidateJwtURL, null, RequestType.USER, null);
     }
 
     @Override
-    public UcsResult<Void> clientValidate() {
-        return request(Void.class, null, "GET", Constant.ValidateClientURL, null, RequestType.CLIENT);
+    public UcsResult<Void> clientValidate(ClientAuthType clientAuthType) {
+        return request(Void.class, null, "GET", Constant.ValidateClientURL, null, RequestType.CLIENT, clientAuthType);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class UcsHttpClient implements Client {
         Map<String, Object> formData = new HashMap<>();
         formData.put("code", code);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
-        return request(PermitResult.class, null, "POST", Constant.ValidatePermOperationByCodeURL, formData, RequestType.USER);
+        return request(PermitResult.class, null, "POST", Constant.ValidatePermOperationByCodeURL, formData, RequestType.USER, null);
     }
 
     @Override
@@ -120,30 +120,30 @@ public class UcsHttpClient implements Client {
         formData.put("method", method);
         formData.put("path", path);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
-        return request(PermitResult.class, null, "POST", Constant.ValidatePermActionURL, formData, RequestType.USER);
+        return request(PermitResult.class, null, "POST", Constant.ValidatePermActionURL, formData, RequestType.USER, null);
     }
 
     @Override
     public <T> UcsResult<T> userRequest(Class<T> klass, String method, String url, Map<String, Object> data) {
-        return request(klass, null, method, url, data, RequestType.USER);
+        return request(klass, null, method, url, data, RequestType.USER, null);
     }
 
     @Override
     public <T> UcsResult<T> userRequest(Type targetType, String method, String url, Map<String, Object> data) {
-        return request(null, targetType, method, url, data, RequestType.USER);
+        return request(null, targetType, method, url, data, RequestType.USER, null);
     }
 
     @Override
-    public <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data) {
-        return request(klass, null, method, url, data, RequestType.CLIENT);
+    public <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data, ClientAuthType clientAuthType) {
+        return request(klass, null, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
     @Override
-    public <T> UcsResult<T> clientRequest(Type targetType, String method, String url, Map<String, Object> data) {
-        return request(null, targetType, method, url, data, RequestType.CLIENT);
+    public <T> UcsResult<T> clientRequest(Type targetType, String method, String url, Map<String, Object> data, ClientAuthType clientAuthType) {
+        return request(null, targetType, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
-    private <T> UcsResult<T> request(Class<T> klass, Type targetType, String method, String url, Map<String, Object> formData, RequestType requestType) {
+    private <T> UcsResult<T> request(Class<T> klass, Type targetType, String method, String url, Map<String, Object> formData, RequestType requestType, ClientAuthType clientAuthType) {
         Map<String, String> headers = new HashMap<>();
         headers.put(this.accessCodeHeader, this.accessCode);
         headers.put(this.randomKeyHeader, getRandomKey(6));
@@ -153,10 +153,7 @@ public class UcsHttpClient implements Client {
                 headers.put(this.userTokenHeader, Constant.BEARER_TYPE + " " + this.userToken);
                 break;
             case CLIENT:
-                prepareForClientRequest();
-                final String finalClientToken = this.clientToken;
-                this.clientToken = null;
-                headers.put(this.clientTokenHeader, finalClientToken);
+                headers.put(this.clientTokenHeader, Constant.BEARER_TYPE + " " + prepareForClientRequest(clientAuthType));
                 break;
             default:
                 throw new IllegalArgumentException("不支持的请求类型");
@@ -218,15 +215,23 @@ public class UcsHttpClient implements Client {
         }
     }
 
-    private void prepareForClientRequest() {
+    private String prepareForClientRequest(ClientAuthType clientAuthType) {
         if (this.baseUrl == null || this.baseUrl.isEmpty()) {
             throw new IllegalArgumentException("请指定ucs服务的base url");
         }
-        if (this.clientToken == null || this.clientToken.isEmpty()) {
-            if (this.clientId == null || this.clientId.isEmpty() || this.clientSecret == null || this.clientSecret.isEmpty()) {
-                throw new IllegalArgumentException("请为ucs提供客户端id和秘钥，或者提供token");
-            }
-            this.clientToken = Base64.getEncoder().encodeToString((this.clientId + "@" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
+        switch (clientAuthType) {
+            case TOKEN:
+                if (this.clientToken == null || this.clientToken.isEmpty()) {
+                    throw new IllegalArgumentException("请指定clientToken");
+                }
+                return this.clientToken;
+            case ID_AND_SECRET:
+                if (this.clientId == null || this.clientId.isEmpty() || this.clientSecret == null || this.clientSecret.isEmpty()) {
+                    throw new IllegalArgumentException("请为ucs提供客户端id和秘钥，或者提供token");
+                }
+                return Base64.getEncoder().encodeToString((this.clientId + "@" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
+            default:
+                throw new IllegalArgumentException("客户端认证方式[" + clientAuthType + "]错误");
         }
     }
 

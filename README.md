@@ -83,6 +83,12 @@ public class TestController {
     @GetMapping("/client-auth")
     public void clientAuth() {
         log.info("client OK");
+        // 本次调用继续使用：外部传来的应用令牌
+        UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.TOKEN);
+        log.info(clientRes.getSuccess().toString());
+        // 本次调用改为使用：自己配置的应用令牌
+        clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.ID_AND_SECRET);
+        log.info(clientRes.getSuccess().toString());
     }
 
     /**
@@ -131,7 +137,7 @@ public class TestController {
     @UcsAuth
     @GetMapping("/invoke")
     public void client() {
-        UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "POST", "/api/v1/ucs/client/validate", null);
+        UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.ID_AND_SECRET);
         log.info(clientRes.getSuccess().toString());
         ParameterizedTypeReference<Ids> type = new ParameterizedTypeReference<>() {};
         UcsResult<Ids> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(type.getType(), "GET", "/api/v1/ucs/current/org-ids", null);

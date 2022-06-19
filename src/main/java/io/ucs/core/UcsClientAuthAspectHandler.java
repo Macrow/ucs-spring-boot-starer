@@ -3,6 +3,7 @@ package io.ucs.core;
 import io.ucs.annotation.UcsClientAuth;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsAuthException;
+import io.ucs.sdk.ClientAuthType;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.UcsResult;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,8 @@ public class UcsClientAuthAspectHandler {
         HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
         String token = request.getHeader(ucsConfig.getClientTokenHeader());
         if (token != null && token.toLowerCase().startsWith("bearer ")) {
-            UcsResult<Void> res = ucsHttpClient.setClientToken(token).clientValidate();
+            token = token.substring("bearer ".length());
+            UcsResult<Void> res = ucsHttpClient.setClientToken(token).clientValidate(ClientAuthType.TOKEN);
             if (!res.getSuccess()) {
                 throw new UcsAuthException(res.getMessage());
             }
