@@ -1,5 +1,6 @@
 package io.ucs.test;
 
+import cn.hutool.json.JSONUtil;
 import io.ucs.annotation.UcsAuth;
 import io.ucs.annotation.UcsClientAuth;
 import io.ucs.annotation.UcsPermByAction;
@@ -39,6 +40,7 @@ public class TestController {
     public void auth() {
         JwtUser jwtUser = UcsUtil.getJwtUser();
         log.info(jwtUser.getName());
+        log.info("orgIds: " + JSONUtil.toJsonStr(UcsUtil.getOrgIds()));
     }
 
     /**
@@ -74,7 +76,7 @@ public class TestController {
     @UcsPermByAction
     @GetMapping("/perm-by-action")
     public void permByAction() {
-
+        log.info("orgIds: " + JSONUtil.toJsonStr(UcsUtil.getOrgIds()));
     }
 
     /**
@@ -84,7 +86,7 @@ public class TestController {
     @UcsPermByAction(method = "PUT", path = "/ok")
     @GetMapping("/perm-by-action2")
     public void permByAction2() {
-
+        log.info("orgIds: " + JSONUtil.toJsonStr(UcsUtil.getOrgIds()));
     }
 
     /**
@@ -95,6 +97,7 @@ public class TestController {
     @GetMapping("/perm-by-code")
     public void permByCode() {
         log.info(UcsUtil.getJwtUser().getName());
+        log.info("orgIds: " + JSONUtil.toJsonStr(UcsUtil.getOrgIds()));
     }
 
     /**
@@ -105,15 +108,14 @@ public class TestController {
     public void client() {
         UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.ID_AND_SECRET);
         log.info(clientRes.getSuccess().toString());
-        ParameterizedTypeReference<Ids> type = new ParameterizedTypeReference<>() {};
-        UcsResult<Ids> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(type.getType(), "GET", "/api/v1/ucs/current/org-ids", null);
-        userRes.getResult().getIds().forEach(log::info);
-        userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(Ids.class, "GET", "/api/v1/ucs/current/org-ids", null);
-        userRes.getResult().getIds().forEach(log::info);
+        ParameterizedTypeReference<Operations> type = new ParameterizedTypeReference<>() {
+        };
+        UcsResult<Operations> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(type.getType(), "GET", "/api/v1/ucs/current/operations", null);
+        userRes.getResult().getItems().forEach(log::info);
     }
 
     @Data
-    private static class Ids {
-        private List<String> ids;
+    private static class Operations {
+        private List<String> items;
     }
 }

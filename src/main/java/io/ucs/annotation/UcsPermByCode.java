@@ -19,6 +19,7 @@ public @interface UcsPermByCode {
     String code();
 
     boolean fulfillJwt() default true;
+    boolean fulfillOrgIds() default true;
 
     Class<?> afterHandler() default Handler.class;
 

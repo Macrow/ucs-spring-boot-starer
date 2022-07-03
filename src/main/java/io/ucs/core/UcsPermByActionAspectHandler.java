@@ -53,26 +53,29 @@ public class UcsPermByActionAspectHandler {
             }
             UcsResult<PermitResult> res;
             try {
-                res = ucsHttpClient.setUserToken(token).userValidatePermByAction(ucsConfig.getAppServiceName(), method, path, ucsPermByAction.fulfillJwt());
+                res = ucsHttpClient.setUserToken(token).userValidatePermByAction(ucsConfig.getAppServiceName(), method, path, ucsPermByAction.fulfillJwt(), ucsPermByAction.fulfillOrgIds());
             } catch (Exception e) {
                 throw new UcsAuthException(e.getMessage());
             }
             if (res.getSuccess()) {
                 if (ucsPermByAction.fulfillJwt()) {
                     request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());
-                    if (ucsPermByAction.afterHandler() != Handler.class) {
-                        Object handler = null;
-                        try {
-                            handler = SpringUtil.getBean(ucsPermByAction.afterHandler());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            log.error("afterHandler参数错误:" + e.getMessage());
-                        }
-                        if (handler instanceof Handler) {
-                            ((Handler) handler).handle(res.getResult().getUser());
-                        } else {
-                            throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
-                        }
+                }
+                if (ucsPermByAction.fulfillOrgIds()) {
+                    request.setAttribute(Constant.REQUEST_ORG_IDS_KEY, res.getResult().getOrgIds());
+                }
+                if (ucsPermByAction.afterHandler() != Handler.class) {
+                    Object handler = null;
+                    try {
+                        handler = SpringUtil.getBean(ucsPermByAction.afterHandler());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        log.error("afterHandler参数错误:" + e.getMessage());
+                    }
+                    if (handler instanceof Handler) {
+                        ((Handler) handler).handle(res.getResult().getUser(), res.getResult().getOrgIds());
+                    } else {
+                        throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
                     }
                 }
                 if (!res.getResult().getPermit()) {

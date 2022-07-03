@@ -21,6 +21,7 @@ public @interface UcsPermByAction {
     String path() default "";
 
     boolean fulfillJwt() default true;
+    boolean fulfillOrgIds() default true;
 
     Class<?> afterHandler() default Handler.class;
 

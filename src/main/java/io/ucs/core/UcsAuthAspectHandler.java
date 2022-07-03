@@ -20,6 +20,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,7 +62,7 @@ public class UcsAuthAspectHandler {
                         log.error("afterHandler参数错误:" + e.getMessage());
                     }
                     if (handler instanceof Handler) {
-                        ((Handler) handler).handle(jwtUser);
+                        ((Handler) handler).handle(jwtUser, List.of());
                     } else {
                         throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
                     }

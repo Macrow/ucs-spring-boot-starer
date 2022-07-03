@@ -106,20 +106,22 @@ public class UcsHttpClient implements Client {
     }
 
     @Override
-    public UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt) {
+    public UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt, Boolean fulfillOrgIds) {
         Map<String, Object> formData = new HashMap<>();
         formData.put("code", code);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
+        formData.put("fulfillOrgIds", fulfillOrgIds ? "1" : "0");
         return request(PermitResult.class, null, "POST", Constant.ValidatePermOperationByCodeURL, formData, RequestType.USER, null);
     }
 
     @Override
-    public UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt) {
+    public UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt, Boolean fulfillOrgIds) {
         Map<String, Object> formData = new HashMap<>();
         formData.put("service", service);
         formData.put("method", method);
         formData.put("path", path);
         formData.put("fulfillJwt", fulfillJwt ? "1" : "0");
+        formData.put("fulfillOrgIds", fulfillOrgIds ? "1" : "0");
         return request(PermitResult.class, null, "POST", Constant.ValidatePermActionURL, formData, RequestType.USER, null);
     }
 

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @author Macrow
  * @date 2022-03-20
@@ -16,4 +18,5 @@ import lombok.Setter;
 public class PermitResult {
     private Boolean permit;
     private JwtUser user;
+    private List<String> orgIds;
 }

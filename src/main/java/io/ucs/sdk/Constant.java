@@ -23,4 +23,5 @@ public interface Constant {
     String CLIENT_HEADER_NAME = "Client-Authorization";
     String BEARER_TYPE = "Bearer";
     String REQUEST_JWT_USER_KEY = "__UCS_JWT_USER__";
+    String REQUEST_ORG_IDS_KEY = "__UCS_ORG_IDS__";
 }

@@ -22,8 +22,8 @@ public interface Client {
 
     UcsResult<JwtUser> userValidateJwt();
     UcsResult<Void> clientValidate(ClientAuthType clientAuthType);
-    UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt);
-    UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt);
+    UcsResult<PermitResult> userValidatePermByOperation(String code, Boolean fulfillJwt, Boolean fulfillOrgIds);
+    UcsResult<PermitResult> userValidatePermByAction(String service, String method, String path, Boolean fulfillJwt, Boolean fulfillOrgIds);
 
     <T> UcsResult<T> userRequest(Class<T> klass, String method, String url, Map<String, Object> data);
     <T> UcsResult<T> userRequest(Type targetType, String method, String url, Map<String, Object> data);
