@@ -4,7 +4,9 @@ import io.ucs.annotation.UcsClientAuth;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsAuthException;
 import io.ucs.sdk.ClientAuthType;
+import io.ucs.sdk.RequestType;
 import io.ucs.sdk.UcsHttpClient;
+import io.ucs.sdk.entity.UcsMetaInfo;
 import io.ucs.sdk.entity.UcsResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import java.util.Objects;
 @Order(0)
 @RequiredArgsConstructor
 public class UcsClientAuthAspectHandler {
+    final UcsMetaInfoExtractor ucsMetaInfoExtractor;
     final UcsConfig ucsConfig;
     final UcsHttpClient ucsHttpClient;
 
@@ -36,21 +39,21 @@ public class UcsClientAuthAspectHandler {
     public Object around(ProceedingJoinPoint joinPoint, UcsClientAuth ucsClientAuth) throws Throwable {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
-        String token = request.getHeader(ucsConfig.getClientTokenHeader());
-        if (token != null && token.toLowerCase().startsWith("bearer ")) {
-            token = token.substring("bearer ".length());
-            UcsResult<Void> res;
-            try {
-                res = ucsHttpClient.setClientToken(token).clientValidate(ClientAuthType.TOKEN);
-            } catch (Exception e) {
-                throw new UcsAuthException(e.getMessage());
-            }
-            if (!res.getSuccess()) {
-                throw new UcsAuthException(res.getMessage());
-            }
-        } else {
-            throw new UcsAuthException("权限验证失败：请求令牌格式错误");
+        UcsMetaInfo ucsMetaInfo = ucsMetaInfoExtractor.extract(request, RequestType.CLIENT);
+        UcsResult<Void> res;
+        try {
+            res = ucsHttpClient
+                    .setClientToken(ucsMetaInfo.getClientToken())
+                    .setAccessCode(ucsMetaInfo.getAccessCode())
+                    .setRandomKey(ucsMetaInfo.getRandomKey())
+                    .clientValidate(ClientAuthType.TOKEN);
+        } catch (Exception e) {
+            throw new UcsAuthException(e.getMessage());
         }
+        if (!res.getSuccess()) {
+            throw new UcsAuthException(res.getMessage());
+        }
+
         return joinPoint.proceed();
     }
 }

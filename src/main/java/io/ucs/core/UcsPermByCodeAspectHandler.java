@@ -7,8 +7,10 @@ import io.ucs.exception.UcsAuthException;
 import io.ucs.exception.UcsPermException;
 import io.ucs.handler.Handler;
 import io.ucs.sdk.Constant;
+import io.ucs.sdk.RequestType;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.PermitResult;
+import io.ucs.sdk.entity.UcsMetaInfo;
 import io.ucs.sdk.entity.UcsResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ import java.util.Objects;
 @Order(0)
 @RequiredArgsConstructor
 public class UcsPermByCodeAspectHandler {
+    final UcsMetaInfoExtractor ucsMetaInfoExtractor;
     final UcsHttpClient ucsHttpClient;
     final UcsConfig ucsConfig;
 
@@ -40,45 +43,45 @@ public class UcsPermByCodeAspectHandler {
     public Object around(ProceedingJoinPoint joinPoint, UcsPermByCode ucsPermByCode) throws Throwable {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
-        String token = request.getHeader(ucsConfig.getUserTokenHeader());
-        if (token != null && token.toLowerCase().startsWith("bearer ")) {
-            token = token.substring("bearer ".length());
-            UcsResult<PermitResult> res;
-            try {
-                res = ucsHttpClient.setUserToken(token).userValidatePermByOperation(ucsPermByCode.code(), ucsPermByCode.fulfillJwt(), ucsPermByCode.fulfillOrgIds());
-            } catch (Exception e) {
-                throw new UcsAuthException(e.getMessage());
+        UcsMetaInfo ucsMetaInfo = ucsMetaInfoExtractor.extract(request, RequestType.USER);
+        UcsResult<PermitResult> res;
+        try {
+            res = ucsHttpClient
+                    .setUserToken(ucsMetaInfo.getUserToken())
+                    .setAccessCode(ucsMetaInfo.getAccessCode())
+                    .setRandomKey(ucsMetaInfo.getRandomKey())
+                    .userValidatePermByOperation(ucsPermByCode.code(), ucsPermByCode.fulfillJwt(), ucsPermByCode.fulfillOrgIds());
+        } catch (Exception e) {
+            throw new UcsAuthException(e.getMessage());
+        }
+        if (res.getSuccess()) {
+            if (ucsPermByCode.fulfillJwt()) {
+                request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());
             }
-            if (res.getSuccess()) {
-                if (ucsPermByCode.fulfillJwt()) {
-                    request.setAttribute(Constant.REQUEST_JWT_USER_KEY, res.getResult().getUser());
+            if (ucsPermByCode.fulfillOrgIds()) {
+                request.setAttribute(Constant.REQUEST_ORG_IDS_KEY, res.getResult().getOrgIds());
+            }
+            if (ucsPermByCode.afterHandler() != Handler.class) {
+                Object handler = null;
+                try {
+                    handler = SpringUtil.getBean(ucsPermByCode.afterHandler());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error("afterHandler参数错误:" + e.getMessage());
                 }
-                if (ucsPermByCode.fulfillOrgIds()) {
-                    request.setAttribute(Constant.REQUEST_ORG_IDS_KEY, res.getResult().getOrgIds());
+                if (handler instanceof Handler) {
+                    ((Handler) handler).handle(res.getResult().getUser(), res.getResult().getOrgIds());
+                } else {
+                    throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
                 }
-                if (ucsPermByCode.afterHandler() != Handler.class) {
-                    Object handler = null;
-                    try {
-                        handler = SpringUtil.getBean(ucsPermByCode.afterHandler());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("afterHandler参数错误:" + e.getMessage());
-                    }
-                    if (handler instanceof Handler) {
-                        ((Handler) handler).handle(res.getResult().getUser(), res.getResult().getOrgIds());
-                    } else {
-                        throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
-                    }
-                }
-                if (!res.getResult().getPermit()) {
-                    throw new UcsPermException("UCS权限验证失败");
-                }
-            } else {
-                throw new RuntimeException(res.getMessage());
+            }
+            if (!res.getResult().getPermit()) {
+                throw new UcsPermException("UCS权限验证失败");
             }
         } else {
-            throw new UcsPermException("权限验证失败：请求令牌格式错误");
+            throw new RuntimeException(res.getMessage());
         }
+
         return joinPoint.proceed();
     }
 }

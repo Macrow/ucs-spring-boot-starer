@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Macrow
@@ -29,6 +30,14 @@ public class UcsUtil {
             return List.of();
         }
         return (List<String>) orgIds;
+    }
+
+    public static String generateRandomKey() {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            result.append(ThreadLocalRandom.current().nextInt(0, 9));
+        }
+        return result.toString();
     }
 
     private static HttpServletRequest getRequest() {

@@ -1,10 +1,7 @@
 package io.ucs;
 
 import io.ucs.config.UcsConfig;
-import io.ucs.core.UcsAuthAspectHandler;
-import io.ucs.core.UcsClientAuthAspectHandler;
-import io.ucs.core.UcsPermByActionAspectHandler;
-import io.ucs.core.UcsPermByCodeAspectHandler;
+import io.ucs.core.*;
 import io.ucs.sdk.UcsHttpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,9 +26,20 @@ public class UcsAutoConfiguration {
     public UcsHttpClient httpUcsClient() {
         return new UcsHttpClient(
                 ucsConfig.getServiceBaseUrl(),
-                ucsConfig.getAccessCode(),
+                ucsConfig.getClientAccessCode(),
                 ucsConfig.getClientId(),
-                ucsConfig.getClientSecret()
+                ucsConfig.getClientSecret(),
+                ucsConfig.getAccessCodeHeader(),
+                ucsConfig.getRandomKeyHeader(),
+                ucsConfig.getUserTokenHeader(),
+                ucsConfig.getUserTokenHeaderSchema(),
+                ucsConfig.getClientTokenHeader(),
+                ucsConfig.getClientTokenHeaderSchema()
         );
+    }
+
+    @Bean
+    public UcsMetaInfoExtractor ucsMetaInfoExtractor() {
+        return new UcsMetaInfoExtractor(ucsConfig);
     }
 }

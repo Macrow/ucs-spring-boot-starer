@@ -1,5 +1,6 @@
 package io.ucs.config;
 
+import io.ucs.sdk.Constant;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,11 +19,13 @@ public class UcsConfig {
     private Boolean enable;
     private String appServiceName;
     private String serviceBaseUrl;
-    private String accessCode;
+    private String clientAccessCode;
     private String clientId;
     private String clientSecret;
-    private String accessCodeHeader = "Access-Code";
-    private String randomKeyHeader = "Random-Key";
-    private String userTokenHeader = "Authorization";
-    private String clientTokenHeader = "Client-Authorization";
+    private String accessCodeHeader = Constant.DEFAULT_ACCESS_CODE;
+    private String randomKeyHeader = Constant.DEFAULT_HEADER_RANDOM_KEY;
+    private String userTokenHeader = Constant.DEFAULT_USER_HEADER_NAME;
+    private String userTokenHeaderSchema = Constant.DEFAULT_BEARER_TYPE;
+    private String clientTokenHeader = Constant.DEFAULT_CLIENT_HEADER_NAME;
+    private String clientTokenHeaderSchema = Constant.DEFAULT_BEARER_TYPE;
 }

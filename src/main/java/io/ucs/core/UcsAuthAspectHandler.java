@@ -6,8 +6,10 @@ import io.ucs.handler.Handler;
 import io.ucs.config.UcsConfig;
 import io.ucs.exception.UcsAuthException;
 import io.ucs.sdk.Constant;
+import io.ucs.sdk.RequestType;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.JwtUser;
+import io.ucs.sdk.entity.UcsMetaInfo;
 import io.ucs.sdk.entity.UcsResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ import java.util.Objects;
 @Order(0)
 @RequiredArgsConstructor
 public class UcsAuthAspectHandler {
+    final UcsMetaInfoExtractor ucsMetaInfoExtractor;
     final UcsConfig ucsConfig;
     final UcsHttpClient ucsHttpClient;
 
@@ -40,38 +43,37 @@ public class UcsAuthAspectHandler {
     public Object around(ProceedingJoinPoint joinPoint, UcsAuth ucsAuth) throws Throwable {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = Objects.requireNonNull(requestAttributes).getRequest();
-        String token = request.getHeader(ucsConfig.getUserTokenHeader());
-        if (token != null && token.toLowerCase().startsWith("bearer ")) {
-            token = token.substring("bearer ".length());
-            UcsResult<JwtUser> res;
-            try {
-                res = ucsHttpClient.setUserToken(token).userValidateJwt();
-            } catch (Exception e) {
-                throw new UcsAuthException(e.getMessage());
-            }
-            if (res.getSuccess()) {
-                JwtUser jwtUser = res.getResult();
-                jwtUser.setToken(token);
-                request.setAttribute(Constant.REQUEST_JWT_USER_KEY, jwtUser);
-                if (ucsAuth.afterHandler() != Handler.class) {
-                    Object handler = null;
-                    try {
-                        handler = SpringUtil.getBean(ucsAuth.afterHandler());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("afterHandler参数错误:" + e.getMessage());
-                    }
-                    if (handler instanceof Handler) {
-                        ((Handler) handler).handle(jwtUser, List.of());
-                    } else {
-                        throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
-                    }
+        UcsMetaInfo ucsMetaInfo = ucsMetaInfoExtractor.extract(request, RequestType.USER);
+        UcsResult<JwtUser> res;
+        try {
+            res = ucsHttpClient
+                    .setUserToken(ucsMetaInfo.getUserToken())
+                    .setAccessCode(ucsMetaInfo.getAccessCode())
+                    .setRandomKey(ucsMetaInfo.getRandomKey())
+                    .userValidateJwt();
+        } catch (Exception e) {
+            throw new UcsAuthException(e.getMessage());
+        }
+        if (res.getSuccess()) {
+            JwtUser jwtUser = res.getResult();
+            jwtUser.setToken(ucsMetaInfo.getUserToken());
+            request.setAttribute(Constant.REQUEST_JWT_USER_KEY, jwtUser);
+            if (ucsAuth.afterHandler() != Handler.class) {
+                Object handler = null;
+                try {
+                    handler = SpringUtil.getBean(ucsAuth.afterHandler());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error("afterHandler参数错误:" + e.getMessage());
                 }
-            } else {
-                throw new UcsAuthException(res.getMessage());
+                if (handler instanceof Handler) {
+                    ((Handler) handler).handle(jwtUser, List.of());
+                } else {
+                    throw new UcsAuthException("afterHandler参数错误:该bean必须实现Handler接口");
+                }
             }
         } else {
-            throw new UcsAuthException("权限验证失败：请求令牌格式错误");
+            throw new UcsAuthException(res.getMessage());
         }
 
         return joinPoint.proceed();

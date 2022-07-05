@@ -1,9 +1,11 @@
 package io.ucs.sdk;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import io.ucs.sdk.entity.JwtUser;
 import io.ucs.sdk.entity.PermitResult;
 import io.ucs.sdk.entity.UcsResult;
+import io.ucs.util.UcsUtil;
 import kong.unirest.*;
 import kong.unirest.json.JSONObject;
 
@@ -13,7 +15,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Macrow
@@ -21,30 +22,53 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class UcsHttpClient implements Client {
     private String baseUrl;
+    private String clientAccessCode;
     private String accessCode;
+    private String randomKey;
     private String accessCodeHeader;
     private String randomKeyHeader;
     private String userTokenHeader;
+    private String userTokenHeaderSchema;
     private String clientTokenHeader;
+    private String clientTokenHeaderSchema;
     private String userToken = null;
     private String clientToken = null;
     private String clientId = null;
     private String clientSecret = null;
     private int timeout = Constant.DEFAULT_TIMEOUT_IN_SECONDS;
 
-    public UcsHttpClient(String baseUrl, String accessCode) {
+    public UcsHttpClient(String baseUrl) {
         this.baseUrl = baseUrl;
-        this.accessCode = accessCode;
-        this.accessCodeHeader = Constant.DefaultHeaderAccessCode;
-        this.randomKeyHeader = Constant.DefaultHeaderRandomKey;
-        this.userTokenHeader = Constant.BEARER_NAME;
-        this.clientTokenHeader = Constant.CLIENT_HEADER_NAME;
+        this.accessCodeHeader = Constant.DEFAULT_ACCESS_CODE;
+        this.randomKeyHeader = Constant.DEFAULT_HEADER_RANDOM_KEY;
+        this.userTokenHeader = Constant.DEFAULT_USER_HEADER_NAME;
+        this.userTokenHeaderSchema = Constant.DEFAULT_BEARER_TYPE;
+        this.clientTokenHeader = Constant.DEFAULT_CLIENT_HEADER_NAME;
+        this.clientTokenHeaderSchema = Constant.DEFAULT_BEARER_TYPE;
     }
 
-    public UcsHttpClient(String baseUrl, String accessCode, String clientId, String clientSecret) {
-        this(baseUrl, accessCode);
+    public UcsHttpClient(
+            String baseUrl,
+            String clientAccessCode,
+            String clientId,
+            String clientSecret,
+            String accessCodeHeader,
+            String randomKeyHeader,
+            String userTokenHeader,
+            String userTokenHeaderSchema,
+            String clientTokenHeader,
+            String clientTokenHeaderSchema
+    ) {
+        this(baseUrl);
+        this.clientAccessCode = clientAccessCode;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.accessCodeHeader = StrUtil.isEmpty(accessCodeHeader) ? Constant.DEFAULT_ACCESS_CODE : accessCodeHeader;
+        this.randomKeyHeader = StrUtil.isEmpty(randomKeyHeader) ? Constant.DEFAULT_HEADER_RANDOM_KEY : randomKeyHeader;
+        this.userTokenHeader = StrUtil.isEmpty(userTokenHeader) ? Constant.DEFAULT_USER_HEADER_NAME : userTokenHeader;
+        this.userTokenHeaderSchema = StrUtil.isEmpty(userTokenHeaderSchema) ? Constant.DEFAULT_BEARER_TYPE : userTokenHeaderSchema;
+        this.clientTokenHeader = StrUtil.isEmpty(clientTokenHeader) ? Constant.DEFAULT_CLIENT_HEADER_NAME : clientTokenHeader;
+        this.clientTokenHeaderSchema = StrUtil.isEmpty(clientTokenHeaderSchema) ? Constant.DEFAULT_BEARER_TYPE : clientTokenHeaderSchema;
     }
 
     @Override
@@ -64,6 +88,12 @@ public class UcsHttpClient implements Client {
     @Override
     public Client setAccessCode(String accessCode) {
         this.accessCode = accessCode;
+        return this;
+    }
+
+    @Override
+    public Client setRandomKey(String randomKey) {
+        this.randomKey = randomKey;
         return this;
     }
 
@@ -137,25 +167,33 @@ public class UcsHttpClient implements Client {
 
     @Override
     public <T> UcsResult<T> clientRequest(Class<T> klass, String method, String url, Map<String, Object> data, ClientAuthType clientAuthType) {
+        if (StrUtil.isNotEmpty(this.clientAccessCode)) {
+            this.accessCode = this.clientAccessCode;
+        }
+        this.randomKey = UcsUtil.generateRandomKey();
         return request(klass, null, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
     @Override
     public <T> UcsResult<T> clientRequest(Type targetType, String method, String url, Map<String, Object> data, ClientAuthType clientAuthType) {
+        if (StrUtil.isNotEmpty(this.clientAccessCode)) {
+            this.accessCode = this.clientAccessCode;
+        }
+        this.randomKey = UcsUtil.generateRandomKey();
         return request(null, targetType, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
     private <T> UcsResult<T> request(Class<T> klass, Type targetType, String method, String url, Map<String, Object> formData, RequestType requestType, ClientAuthType clientAuthType) {
         Map<String, String> headers = new HashMap<>();
         headers.put(this.accessCodeHeader, this.accessCode);
-        headers.put(this.randomKeyHeader, getRandomKey(6));
+        headers.put(this.randomKeyHeader, this.randomKey);
         switch (requestType) {
             case USER:
                 prepareForUserRequest();
-                headers.put(this.userTokenHeader, Constant.BEARER_TYPE + " " + this.userToken);
+                headers.put(this.userTokenHeader, this.userTokenHeaderSchema + " " + this.userToken);
                 break;
             case CLIENT:
-                headers.put(this.clientTokenHeader, Constant.BEARER_TYPE + " " + prepareForClientRequest(clientAuthType));
+                headers.put(this.clientTokenHeader, this.clientTokenHeaderSchema + " " + prepareForClientRequest(clientAuthType));
                 break;
             default:
                 throw new IllegalArgumentException("不支持的请求类型");
@@ -235,13 +273,5 @@ public class UcsHttpClient implements Client {
             default:
                 throw new IllegalArgumentException("客户端认证方式[" + clientAuthType + "]错误");
         }
-    }
-
-    private String getRandomKey(int length) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            result.append(ThreadLocalRandom.current().nextInt(0, 9));
-        }
-        return result.toString();
     }
 }

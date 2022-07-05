@@ -15,6 +15,7 @@ public interface Client {
     Client setTimeout(int timeout);
     Client setBaseUrl(String baseUrl);
     Client setAccessCode(String accessCode);
+    Client setRandomKey(String randomKey);
     Client setUserToken(String token);
     Client setClientToken(String token);
     Client setClientIdAndSecret(String clientId, String clientSecret);

@@ -101,17 +101,28 @@ public class TestController {
     }
 
     /**
-     * 可直接进行用户级别、应用级别的调用
+     * 可直接进行用户级别的调用
      */
     @UcsAuth
-    @GetMapping("/invoke")
-    public void client() {
-        UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.ID_AND_SECRET);
-        log.info(clientRes.getSuccess().toString());
+    @GetMapping("/user-invoke")
+    public void userRequest() {
         ParameterizedTypeReference<Operations> type = new ParameterizedTypeReference<>() {
         };
-        UcsResult<Operations> userRes = ucsHttpClient.setUserToken(UcsUtil.getJwtUser().getToken()).userRequest(type.getType(), "GET", "/api/v1/ucs/current/operations", null);
+        UcsResult<Operations> userRes = ucsHttpClient
+                .setUserToken(UcsUtil.getJwtUser().getToken())
+                .setAccessCode("1A2B3C4D")
+                .setRandomKey(UcsUtil.generateRandomKey())
+                .userRequest(type.getType(), "GET", "/api/v1/ucs/current/operations", null);
         userRes.getResult().getItems().forEach(log::info);
+    }
+
+    /**
+     * 可直接进行应用级别的调用
+     */
+    @GetMapping("/client-invoke")
+    public void clientRequest() {
+        UcsResult<Object> clientRes = ucsHttpClient.clientRequest(Object.class, "GET", "/api/v1/ucs/client/validate", null, ClientAuthType.ID_AND_SECRET);
+        log.info(clientRes.getSuccess().toString());
     }
 
     @Data
