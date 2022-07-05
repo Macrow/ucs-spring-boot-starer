@@ -5,7 +5,6 @@ import cn.hutool.json.JSONUtil;
 import io.ucs.sdk.entity.JwtUser;
 import io.ucs.sdk.entity.PermitResult;
 import io.ucs.sdk.entity.UcsResult;
-import io.ucs.util.UcsUtil;
 import kong.unirest.*;
 import kong.unirest.json.JSONObject;
 
@@ -15,6 +14,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Macrow
@@ -170,7 +170,7 @@ public class UcsHttpClient implements Client {
         if (StrUtil.isNotEmpty(this.clientAccessCode)) {
             this.accessCode = this.clientAccessCode;
         }
-        this.randomKey = UcsUtil.generateRandomKey();
+        this.randomKey = generateRandomKey();
         return request(klass, null, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
@@ -179,7 +179,7 @@ public class UcsHttpClient implements Client {
         if (StrUtil.isNotEmpty(this.clientAccessCode)) {
             this.accessCode = this.clientAccessCode;
         }
-        this.randomKey = UcsUtil.generateRandomKey();
+        this.randomKey = generateRandomKey();
         return request(null, targetType, method, url, data, RequestType.CLIENT, clientAuthType);
     }
 
@@ -273,5 +273,13 @@ public class UcsHttpClient implements Client {
             default:
                 throw new IllegalArgumentException("客户端认证方式[" + clientAuthType + "]错误");
         }
+    }
+
+    public static String generateRandomKey() {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            result.append(ThreadLocalRandom.current().nextInt(0, 9));
+        }
+        return result.toString();
     }
 }

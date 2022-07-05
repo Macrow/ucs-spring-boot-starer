@@ -111,7 +111,7 @@ public class TestController {
         UcsResult<Operations> userRes = ucsHttpClient
                 .setUserToken(UcsUtil.getJwtUser().getToken())
                 .setAccessCode("1A2B3C4D")
-                .setRandomKey(UcsUtil.generateRandomKey())
+                .setRandomKey(UcsHttpClient.generateRandomKey())
                 .userRequest(type.getType(), "GET", "/api/v1/ucs/current/operations", null);
         userRes.getResult().getItems().forEach(log::info);
     }
