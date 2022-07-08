@@ -79,7 +79,7 @@ public class UcsPermByCodeAspectHandler {
                 throw new UcsPermException("UCS权限验证失败");
             }
         } else {
-            throw new RuntimeException(res.getMessage());
+            throw new UcsPermException(res.getMessage());
         }
 
         return joinPoint.proceed();
