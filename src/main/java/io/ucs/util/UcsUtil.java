@@ -9,6 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Macrow
@@ -23,6 +24,15 @@ public class UcsUtil {
         return (JwtUser) jwtUserObject;
     }
 
+    public static Optional<JwtUser> getOptionalJwtUser() {
+        Object jwtUserObject = getRequest().getAttribute(Constant.REQUEST_JWT_USER_KEY);
+        if (jwtUserObject == null) {
+            return Optional.empty();
+        }
+        return Optional.of((JwtUser) jwtUserObject);
+    }
+
+    @SuppressWarnings({"unchecked"})
     public static List<String> getOrgIds() {
         Object orgIds = getRequest().getAttribute(Constant.REQUEST_ORG_IDS_KEY);
         if (orgIds == null) {
