@@ -1,10 +1,7 @@
 package io.ucs.test;
 
 import cn.hutool.json.JSONUtil;
-import io.ucs.annotation.UcsAuth;
-import io.ucs.annotation.UcsClientAuth;
-import io.ucs.annotation.UcsPermByAction;
-import io.ucs.annotation.UcsPermByCode;
+import io.ucs.annotation.*;
 import io.ucs.sdk.ClientAuthType;
 import io.ucs.sdk.UcsHttpClient;
 import io.ucs.sdk.entity.JwtUser;
@@ -63,17 +60,16 @@ public class TestController {
      * 校验用户登录是否合法，并返回JwtUser对象
      * 如果验证失败，会抛出UcsAuthException异常
      */
-    @UcsAuth(afterHandler = CustomAfterHandler.class)
     @GetMapping("/auth-with-custom-handler")
     public void authWithCustomHandler() {
-
+        log.info("OK");
     }
 
     /**
      * 校验用户是否拥有Action权限，如果不指定method和path，会自动识别
      * 如果验证失败，会抛出UcsPermException
      */
-    @UcsPermByAction
+//    @UcsPermByAction
     @GetMapping("/perm-by-action")
     public void permByAction() {
         log.info("orgIds: " + JSONUtil.toJsonStr(UcsUtil.getOrgIds()));
