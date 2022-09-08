@@ -1,3 +1,5 @@
+# deprecated
+
 # ucs-spring-boot-starter
 [![](https://jitpack.io/v/Macrow/ucs-spring-boot-starter.svg)](https://jitpack.io/#Macrow/ucs-spring-boot-starter)
 
